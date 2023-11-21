@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Sep  8 23:11:46 2022
-
-@author: Matthieu Nougaret
-
 This script groups together different functions that are not related to
 specific subject as the other.
 """
