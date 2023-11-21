@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Sep  7 14:39:00 2022
-
-@author: Matthieu Nougaret
-
 These functions are to be used for predicting (with error due to the random
 nature of the game mechanic of the agriculture).
 
