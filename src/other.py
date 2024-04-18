@@ -4,7 +4,7 @@ This script groups together different functions that are not related to
 specific subject as the other.
 """
 
-def KamaProduction(minerai_inf, quanti):
+def kama_production(minerai_inf, quanti):
 	"""
 	Calculate how much would give the craft recipes of kamas.
 
@@ -17,26 +17,26 @@ def KamaProduction(minerai_inf, quanti):
 
 	Returns
 	-------
-	Kamas : int
+	kamas : int
 		Quantity of kama producted.
 
 	"""
-	Minerals = {'Iron_2':150, 'Copper':240, 'Silex':330, 'Zinc':420,
+	minerals = {'Iron_2':150, 'Copper':240, 'Silex':330, 'Zinc':420,
 				'Korail':510, 'Sandstone':600, 'Titan_S':9000, 'Saphire':690,
 				'Carbone_S':9800, 'Mercury_S':16000, 'Carbone':780,
 				'Obsidienne':11400}
 	if minerai_inf == 'Iron':
-		Kamas = quanti*50
+		kamas = quanti*50
 
 	elif minerai_inf != 'Fer' :
-		minerai_use = Minerals[minerai_inf]
-		Kamas = int(quanti/5)*minerai_use
+		minerai_use = minerals[minerai_inf]
+		kamas = int(quanti/5)*minerai_use
 
 	else :
-		Kamas = 0
+		kamas = 0
 		print("This  does not exist or is not implemented yet")
 
-	return Kamas
+	return kamas
 
 
 

@@ -31,53 +31,54 @@ This code does not hav any licence.
 """
 import numpy as np
 #=============================================================================
-def planting_stage(Nbfree, NbSeed, pProb):
+def planting_stage(nb_free, nb_seed, proba):
 	"""
 	Simulates trying to fill a N-box card with plants.
 
 	Parameters
 	----------
-	Nbfree : int
+	nb_free : int
 		Number of free cards/cells on the map that we want to fill whith
 		plants or trees. Nbfree have to be superior to 0.
-	NbSeed : int
+	nb_seed : int
 		Number of seeds are cuts possessed by the player.
-	pProb : float
+	proba : float
 		Plant succes probability in per centage (0 to 1).
 
 	Returns
 	-------
-	Nbfree : int
+	nb_free : int
 		Number of free cards/cells on the map that we want to fill whith
 		plants.
-	NbSeed : int
+	nb_seed : int
 		Number of seeds or cuts possessed by the player.
-	planReu : int
+	plan_reu : int
 		Number of successful seedling.
 
 	"""
-	planReu = 0
-	while (Nbfree > 0)&(NbSeed > 0):
+	plan_reu = 0
+	while (nb_free > 0)&(nb_seed > 0):
 		reu = np.random.random(1)
-		if reu <= pProb:
-			Nbfree -= 1
-			NbSeed -= 1
-			planReu += 1
-		else :
-			NbSeed -= 1
-	return Nbfree, NbSeed, planReu
+		if reu <= proba:
+			nb_free -= 1
+			nb_seed -= 1
+			plan_reu += 1
+		else:
+			nb_seed -= 1
 
-def harvest_plants_stage(N_plants, seeds, GetSeeds, harvest_buf=0):
+	return nb_free, nb_seed, plan_reu
+
+def harvest_plants_stage(n_plants, seeds, get_seeds, harvest_buf=0):
 	"""
 	Simulate the harvest stage with a map fill with N_plants.
 
 	Parameters
 	----------
-	N_plants : int
+	n_plants : int
 		Number of plants on the map.
 	seeds : int
 		Number of seeds at start.
-	GetSeeds : int
+	get_seeds : int
 		Minimum number of seeds owned. If NSeeds <= GetSeeds the seeds will
 		also be gathered.
 	harvest_buf : int|float, optional
@@ -86,40 +87,42 @@ def harvest_plants_stage(N_plants, seeds, GetSeeds, harvest_buf=0):
 
 	Returns
 	-------
-	SeedGather : int
+	seed_gather : int
 		Number of seeds collected.
-	Ressources : int
+	ressources : int
 		Number of plant collected.
 
 	"""
-	SeedGather = np.zeros(N_plants)
-	Ressources = np.zeros(N_plants)
-	for i in range(N_plants):
-		if seeds+np.sum(SeedGather) <= GetSeeds:
-			SeedGather[i] = int((harvest_buf+1)*np.random.uniform(1, 4))
-		Ressources[i] = int((harvest_buf+1)*np.random.uniform(1, 4))
-	SeedGather = np.sum(SeedGather)
-	Ressources = np.sum(Ressources)
-	return SeedGather, Ressources
+	seed_gather = np.zeros(n_plants)
+	ressources = np.zeros(n_plants)
+	for i in range(n_plants):
+		if seeds+np.sum(seed_gather) <= get_seeds:
+			seed_gather[i] = int((harvest_buf+1)*np.random.uniform(1, 4))
 
-def CropCycle(NSeeds, FreeCells, NCycle, GetSeeds, pProb, harvest_buf=0,
+		ressources[i] = int((harvest_buf+1)*np.random.uniform(1, 4))
+
+	seed_gather = np.sum(seed_gather)
+	ressources = np.sum(ressources)
+	return seed_gather, ressources
+
+def crop_cycle(n_seeds, free_cells, n_cycle, get_seeds, proba, harvest_buf=0,
 			  verbose=False):
 	"""
 	Simulate the farm of plants ressources.
 
 	Parameters
 	----------
-	NSeeds : int
+	n_seeds : int
 		Number of seeds at start.
-	FreeCells : int
+	free_cells : int
 		Number of usable cell on the map.
-	NCycle : int
+	n_cycle : int
 		Number of crop cyle that what to be done. One crop cycle consists in
 		a planting stage followed by a harvest stage.
-	GetSeeds : int
-		Minimum number of seeds owned. If NSeeds <= GetSeeds the seeds will
+	get_seeds : int
+		Minimum number of seeds owned. If n_seeds <= get_seeds the seeds will
 		also be gathered.
-	pProb : float
+	proba : float
 		Probability of successful seeding. Must be in the interval [0, 1].
 	harvest_buf : float, optional
 		Yield as a percentage of the harvest rate. The default is 0. Must be
@@ -129,56 +132,60 @@ def CropCycle(NSeeds, FreeCells, NCycle, GetSeeds, pProb, harvest_buf=0,
 
 	Returns
 	-------
-	Seeds : int
+	seeds : int
 		Number of seeds in the player pocket.
-	PlanteVecteur : np.ndarray
+	plante_vecteur : np.ndarray
 		Array that countain the plant pieces (resources) harvested at each
 		harvest stage.
 	cycl : int
 		Number of crop cycle performed.
 
 	"""
-	PlanteVecteur = []
-	TotCells = FreeCells
-	FreeCells, Seeds, Plans = planting_stage(FreeCells, NSeeds, pProb)
-	GatSeeds, Ressources = harvest_plants_stage(Plans, Seeds, GetSeeds,
+	plante_vecteur = []
+	tot_cells = free_cells
+	free_cells, seeds, plantes = planting_stage(free_cells, n_seeds, proba)
+	gath_seeds, ressources = harvest_plants_stage(plantes, seeds, get_seeds,
 											 harvest_buf)
-	FreeCells = TotCells
-	Seeds = Seeds + GatSeeds
-	PlanteVecteur.append(Ressources)
-	if verbose:
-		print("E1 : {all ressources:", np.sum(PlanteVecteur), ". Seeds:",
-		Seeds)
-	cycl = 1
-	while (cycl != NCycle)&(Seeds > 0):
-		cycl += 1
-		FreeCells, Seeds, Plans = planting_stage(FreeCells, Seeds, pProb)
-		GatSeeds, Ressources = harvest_plants_stage(Plans, Seeds, GetSeeds,
-											  harvest_buf)
-		Plans = 0
-		FreeCells = TotCells
-		Seeds = Seeds + GatSeeds
-		PlanteVecteur.append(Ressources)
-		if verbose:
-			print("E"+str(cycl)+" : {all ressources:", np.sum(PlanteVecteur),
-			 ". Seeds", Seeds)
-	PlanteVecteur = np.array(PlanteVecteur)
-	return Seeds, PlanteVecteur, cycl
 
-def harvest_tree_stage(Trees, Cuts, FreeCell, MinCuts, harvest_buf=0):
+	free_cells = tot_cells
+	seeds = seeds + gath_seeds
+	plante_vecteur.append(ressources)
+	if verbose:
+		print("E1 : {all ressources:", np.sum(plante_vecteur), ". Seeds:",
+		seeds, "}")
+
+	cycl = 1
+	while (cycl != n_cycle)&(seeds > 0):
+		cycl += 1
+		free_cells, seeds, plantes = planting_stage(free_cells, seeds, proba)
+		gath_seeds, ressources = harvest_plants_stage(plantes, seeds, get_seeds,
+											  harvest_buf)
+
+		plantes = 0
+		free_cells = tot_cells
+		seeds = seeds + gath_seeds
+		plante_vecteur.append(ressources)
+		if verbose:
+			print("E"+str(cycl)+" : {all ressources:", np.sum(plante_vecteur),
+			 ". Seeds", seeds, "}")
+
+	plante_vecteur = np.array(plante_vecteur)
+	return seeds, plante_vecteur, cycl
+
+def harvest_tree_stage(trees, cuts, free_cell, min_cuts, harvest_buf=0):
 	"""
 	Simulates the gathering of a (partialy) filled box of n cells with trees.
 
 	Parameters
 	----------
-	Trees : int
+	trees : int
 		Number of trees on the map.
-	Cuts : int
+	cuts : int
 		Number of 'baby tree'.
-	FreeCell : int
+	free_cell : int
 		Number of free cell on the map.
-	MinCuts : int
-		Minimum number of 'baby tree' owned. If Cuts <= MinCuts the seeds will
+	min_cuts : int
+		Minimum number of 'baby tree' owned. If cuts <= min_cuts the seeds will
 		also be gathered.
 	harvest_buf : int|float, optional
 		Yield as a percentage of the harvest rate. The default is 0. Must be
@@ -186,46 +193,48 @@ def harvest_tree_stage(Trees, Cuts, FreeCell, MinCuts, harvest_buf=0):
 
 	Returns
 	-------
-	Trees : int
+	trees : int
 		Number of trees on the map.
-	Cuts : int
+	cuts : int
 		Number of 'baby tree'.
-	FreeCell : int
+	free_cell : int
 		Number of free cell on the map.
-	Ressources : int
+	ressources : int
 		Number of the log of wood gathered.
 
 	"""
-	Ressources = 0
-	for i in range(Trees):
-		if Cuts <= MinCuts:
-			Cuts += int(1+harvest_buf)*np.random.uniform(1, 4)
-			if Cuts <= MinCuts:
-				Cuts += int(1+harvest_buf)*np.random.uniform(1, 4)
-		else:
-			Ressources += int(1+harvest_buf)*np.random.uniform(1, 4)
-			Trees -= 1
-			FreeCell += 1
-	return Trees, Cuts, FreeCell, Ressources
+	ressources = 0
+	for i in range(trees):
+		if cuts <= min_cuts:
+			cuts += int(1+harvest_buf)*np.random.uniform(1, 4)
+			if cuts <= min_cuts:
+				cuts += int(1+harvest_buf)*np.random.uniform(1, 4)
 
-def ForesteryCycle(Ncuts, FreeCell, NCycle, GetCuts, pProb, harvest_buf=0,
-			  verbose=False):
+		else:
+			ressources += int(1+harvest_buf)*np.random.uniform(1, 4)
+			trees -= 1
+			free_cell += 1
+
+	return trees, cuts, free_cell, ressources
+
+def forestery_cycle(n_cuts, free_cell, n_cycle, GetCuts, proba, 
+					harvest_buf=0, verbose=False):
 	"""
 	Simulate the farm of trees ressources.
 
 	Parameters
 	----------
-	Ncuts : int
+	n_cuts : int
 		Number of cutting|saplings at the start.
-	FreeCell : int
+	free_cell : int
 		Number of cell on the map that can be used for the farming.
-	NCycle : int
+	n_cycle : int
 		Number of cyle that want to be done. One cycle consists in a planting
 		stage followed by a forestery stage.
-	GetCuts : int
-		Minimum number of 'baby tree' owned. If Cuts <= MinCuts the seeds will
+	get_cuts : int
+		Minimum number of 'baby tree' owned. If cuts <= min_cuts the seeds will
 		also be gathered.
-	pProb : int|float
+	proba : int|float
 		Probability of successful seeding. Must be in the interval [0, 1].
 	harvest_buf : int|float, optional
 		Yield as a percentage of the forestery rate. The default is 0. Must be
@@ -235,31 +244,40 @@ def ForesteryCycle(Ncuts, FreeCell, NCycle, GetCuts, pProb, harvest_buf=0,
 
 	Returns
 	-------
-	Cuts : int
+	cuts : int
 		Number of cutting|saplings at the start.
-	TreeVector : np.ndarray
+	tree_vector : np.ndarray
 		Array that countain the log of wood (resources) harvested at each
 		forestery stage.
 	cyc : int
 		Number of crop cycle performed.
 
 	"""
-	TreeVector = []
+	tree_vector = []
 	cyc = 1
-	TotCell = FreeCell
-	FreeCells, Cuts, Trees = planting_stage(FreeCell, Ncuts, pProb)
-	Trees, Cuts, FreeCell, Ressources = harvest_tree_stage(Trees, Ncuts,
-											FreeCell, GetCuts, harvest_buf)
-	TreeVector.append(Ressources)
+	tot_cell = free_cell
+	free_cells, cuts, trees = planting_stage(free_cell, n_cuts, proba)
+	trees, cuts, free_cell, ressources = harvest_tree_stage(trees, n_cuts,
+															free_cell,
+															get_cuts,
+															harvest_buf)
+
+	tree_vector.append(ressources)
 	if verbose:
-		print("E1 : {all ressources:", np.sum(TreeVector), ". Seeds:", Cuts)
-	while (cyc < NCycle)|((Cuts <= 0)&(FreeCell >= TotCell)):
-		FreeCells, Cuts, Trees = planting_stage(FreeCell, Cuts, pProb)
-		Trees, Cuts, FreeCell, Ressources = harvest_tree_stage(Trees, Cuts,
-											FreeCell, GetCuts, harvest_buf)
-		TreeVector.append(Ressources)
+		print("E1 : {all ressources:", np.sum(tree_vector), ". Seeds:",
+			  cuts, "}")
+
+	while (cyc < n_cycle)|((cuts <= 0)&(free_cell >= tot_cell)):
+		free_cells, cuts, trees = planting_stage(free_cell, cuts, proba)
+		trees, cuts, free_cell, ressources = harvest_tree_stage(trees,
+													cuts, free_cell,
+													get_cuts, harvest_buf)
+
+		tree_vector.append(ressources)
 		if verbose:
-			print("E"+str(cyc)+" : {all ressources:", np.sum(TreeVector),
-			 ". 'Baby trees'", Cuts)
-	TreeVector = np.array(TreeVector)
-	return Cuts, TreeVector, cyc
+			print("E"+str(cyc)+" : {all ressources:", np.sum(tree_vector),
+			 ". 'Baby trees'", cuts, "}")
+
+	tree_vector = np.array(tree_vector)
+	return cuts, tree_vector, cyc
+
